@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab4</title>
+    <style>
+        body{
+            background-color: green;
+        }
+        label {
+            display: flex;
+            width: max-content;
+        }
+        h2 {
+            text-align: center;
+            font-weight: bold;
+            margin: 2vmin;
+        }
+        button {
+            cursor: pointer;
+            border-radius: 0.5vmin;
+            font-size: large;
+            height: 4vmax;
+        }
+        button:disabled{
+            cursor: not-allowed;
+        }
+        input {
+            text-align: center;
+            font-size: x-large;
+            display: flex;
+            width: 3em;
+            font-family: monospace;
+        }
+        
+        
+        .container {
+            display: flex;
+            justify-content: space-around;
+        }
+        .form {
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: max-content;
+            height: 5vmax;
+            margin: 5vmin auto;
+            font-size: x-large;
+            box-shadow: 0px 0px 1vmin 1vmin white, 0px 0px 2vmin 2vmin Orchid;
+        }
+        
+        .array-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: auto;
+            width: 45%;
+            border: 1px solid #000;
+            position: relative;
+            background-color: white;
+        }
+        .array {
+            display: flex;
+            align-items: flex-end;
+            height: 50vh;
+            width: 100%;
+        }
+        
+        .bar {
+            width: 200px;
+            margin: 1px;
+            background-color: darkslategrey;
+        }
+        .bar.compare {
+            background-color: cyan;
+        }
+        .bar.swap {
+            background-color: orange;
+        }
+        
+        .stats {
+            margin: 1vmin;
+            text-align: center;
+            font-size: large;
+        }
+
+    </style>
+</head>
+<body>
+<div class="form">
+    <label for="arraySize">
+        <span>Array size:</span>
+        <input type="number" id="arraySize" value="32">
+    </label>
+    &emsp;
+    <button id="startButton" onclick="startSorting()">Start Sorting</button>
+    &ensp;
+</div>
+<div class="container">
+    <div id="radixSortContainer" class="array-container">
+        <h2>Radix Sort (Linear time complexity)</h2>
+        <div id="radixSortArray" class="array"></div>
+        <div id="radixSortStats" class="stats"></div>
+    </div>
+    <div id="quickSortContainer" class="array-container">
+        <h2>Quick Sort (Square time complexity)</h2>
+        <div id="quickSortArray" class="array"></div>
+        <div id="quickSortStats" class="stats"></div>
+    </div>
+</div>
+<script>
+    let comparisonsRadix = 0;
+    let swapsRadix = 0;
+    let comparisonsQuick = 0;
+    let swapsQuick = 0;
+    let sortingInProgress = false;
+    const delayInMilliseconds = 40;
+    const maxExp = 31;
+    const maxVal = -(1 << maxExp);
+
+
+    function vh(percent) {
+        const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+        return (percent * h) / 100;
+    }
+
+    function vw(percent) {
+        const w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        return (percent * w) / 100;
+    }
+
+    function vmin(percent) {
+        return Math.min(vh(percent), vw(percent));
+    }
+
+    function vmax(percent) {
+        return Math.max(vh(percent), vw(percent));
+    }
+    
+    function generateArray(size) {
+        const array = [];
+        for (let i = 0; i < size; i++) {
+            array.push(Math.floor(Math.random() * maxVal) + 1);
+        }
+        return array;
+    }
+    
+    function renderArray(container, array, compareIndices = [], swapIndices = []) {
+        container.innerHTML = '';
+        array.forEach((value, index) => {
+            const bar = document.createElement('div');
+            bar.title = `${value}`
+            bar.style.height = `${value/maxVal*vh(50)}px`;
+            bar.classList.add('bar');
+            if (compareIndices.includes(index)) {
+                bar.classList.add('compare');
+            }
+            if (swapIndices.includes(index)) {
+                bar.classList.add('swap');
+            }
+            container.appendChild(bar);
+        });
+    }
+    
+    function updateStats(container, comparisons, swaps) {
+        container.innerHTML = `Comparisons (N): ${comparisons}<br>Swaps (K): ${swaps}`;
+    }
+    
+    async function swap(array, i, j, arrayContainer, statsContainer, comparisons, swaps) {
+        [array[i], array[j]] = [array[j], array[i]];
+        swaps++;
+        renderArray(arrayContainer, array, [], [i, j]);
+        updateStats(statsContainer, comparisons, swaps);
+        await new Promise(resolve => setTimeout(resolve, delayInMilliseconds));
+        return swaps;
+    }
+    
+    function binUpperBoundPow(num) {
+        let i = 0;
+        while (num >> ++i){}
+        return i;
+    }
+    
+    async function radixSort(array, arrayContainer, statsContainer) {
+        const maxBitCount = maxExp;
+        for (let k = 0; k < maxBitCount; k++) {
+            let zeroBucket = [];
+            let oneBucket = [];
+            for (let i = 0; i < array.length; i++) {
+                const bit = getBit(array[i], k);
+                if (bit === 0) {
+                    zeroBucket.push(array[i]);
+                } else {
+                    oneBucket.push(array[i]);
+                }
+                comparisonsRadix++; // Counting each bit check as a comparison
+                renderArray(arrayContainer, array, [i]);
+                updateStats(statsContainer, comparisonsRadix, swapsRadix);
+                await new Promise(resolve => setTimeout(resolve, delayInMilliseconds)); // Adding delay for animation
+            }
+            let index = 0;
+            for (let j = 0; j < zeroBucket.length; j++) {
+                if (array[index] !== zeroBucket[j]) {
+                    array[index] = zeroBucket[j];
+                    swapsRadix++;
+                    renderArray(arrayContainer, array, [], [index]);
+                    updateStats(statsContainer, comparisonsRadix, swapsRadix);
+                    await new Promise(resolve => setTimeout(resolve, delayInMilliseconds)); // Adding delay for animation
+                }
+                index++;
+            }
+            for (let j = 0; j < oneBucket.length; j++) {
+                if (array[index] !== oneBucket[j]) {
+                    array[index] = oneBucket[j];
+                    swapsRadix++;
+                    renderArray(arrayContainer, array, [], [index]);
+                    updateStats(statsContainer, comparisonsRadix, swapsRadix);
+                    await new Promise(resolve => setTimeout(resolve, delayInMilliseconds)); // Adding delay for animation
+                }
+                index++;
+            }
+        }
+    }
+    
+    function getBit(num, place) {
+        return (num >> place) & 1;
+    }
+    
+    async function quickSort(array, left, right, arrayContainer, statsContainer) {
+        if (left < right) {
+            const pivotIndex = await partition(array, left, right, arrayContainer, statsContainer);
+            await quickSort(array, left, pivotIndex - 1, arrayContainer, statsContainer);
+            await quickSort(array, pivotIndex + 1, right, arrayContainer, statsContainer);
+        }
+    }
+    
+    async function partition(array, left, right, arrayContainer, statsContainer) {
+        const pivot = array[right];
+        let i = left - 1;
+        for (let j = left; j < right; j++) {
+            comparisonsQuick++;
+            renderArray(arrayContainer, array, [j, right]);
+            await new Promise(resolve => setTimeout(resolve, delayInMilliseconds)); // Adding delay for animation
+            if (array[j] < pivot) {
+                i++;
+                swapsQuick = await swap(array, i, j, arrayContainer, statsContainer, comparisonsQuick, swapsQuick);
+            }
+        }
+        swapsQuick = await swap(array, i + 1, right, arrayContainer, statsContainer, comparisonsQuick, swapsQuick);
+        return i + 1;
+    }
+    
+    async function startSorting() {
+        if (sortingInProgress) return;
+        
+        sortingInProgress = true;
+        document.getElementById('startButton').disabled = true;
+        
+        const arraySize = document.getElementById('arraySize').value;
+        const array = generateArray(arraySize);
+        const radixArray = [...array];
+        const quickArray = [...array];
+        
+        const radixSortArrayContainer = document.getElementById('radixSortArray');
+        const quickSortArrayContainer = document.getElementById('quickSortArray');
+        const radixSortStatsContainer = document.getElementById('radixSortStats');
+        const quickSortStatsContainer = document.getElementById('quickSortStats');
+        
+        renderArray(radixSortArrayContainer, radixArray);
+        renderArray(quickSortArrayContainer, quickArray);
+        
+        comparisonsRadix = 0;
+        swapsRadix = 0;
+        comparisonsQuick = 0;
+        swapsQuick = 0;
+        
+        await Promise.all([
+            radixSort(radixArray, radixSortArrayContainer, radixSortStatsContainer),
+            quickSort(quickArray, 0, quickArray.length - 1, quickSortArrayContainer, quickSortStatsContainer)
+        ]);
+        
+        console.log(`Radix Sort - Comparisons: ${comparisonsRadix}, Swaps: ${swapsRadix}`);
+        console.log(`Quick Sort - Comparisons: ${comparisonsQuick}, Swaps: ${swapsQuick}`);
+        
+        sortingInProgress = false;
+        document.getElementById('startButton').disabled = false;
+    }
+</script>
+</body>
+</html>

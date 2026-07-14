@@ -1,0 +1,30 @@
+/* External CSS */
+
+/* applying stylesheets to selectors (markup objects) using classes. */
+/* class #1 */
+.header {
+    background-color: lightblue;
+    text-align: center;
+    padding: 8px;
+    transform: rotate(0.1turn);
+}
+
+/* class #2 */
+.nav {
+    background-color: #575c5c;
+    padding: 16px;
+}
+
+/* applying stylesheets to selectors (markup objects) using identifiers */
+/* identifier #1*/
+#main-content {
+    padding: 8px;
+}
+
+/* identifier #2 */
+#main-footer {
+    background-color: lightblue;
+    text-align: center;
+    padding: 8px;
+    mix-blend-mode: hard-light;
+}

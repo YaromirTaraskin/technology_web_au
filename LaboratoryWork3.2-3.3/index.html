@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>Lab3.2-3.3</title>
+</head>
+<body>
+    <h1>Laboratory work #3.2</h1>
+    <div class="info info_box">
+        <h2><i>Move cursor and press keys</i></h2>
+        <p id=info_mouse class="info info_item"></p>
+        <p id=info_key_pressed class="info info_item"></p>        
+    </div>
+    <script src="lab3.2.js"></script>
+    <!------------------------------------------------------------------------->
+    <h1>Laboratory work #3.3</h1>    
+    <div id="calculator" class="info info_box">
+        <h2>Calculator</h2>
+        <form id="calc_form">
+            <input type="number" step="any" id="num1" placeholder="Type first number..." required>
+            <select id="operation">
+                <option value="+">+ (sum)</option>
+                <option value="-">- (substraction)</option>
+                <option value="*">* (multiplication)</option>
+                <option value="/">/ (division)</option>
+                <option value="**">^ (power)</option>               
+            </select>
+            <input type="number" step="any" id="num2" placeholder="Type second number..." required>
+            <button type="submit">Calculate</button>
+        </form>
+        <h3>Result: </h3><span id="result" class="info info_item">Loading...</span>
+    </div>
+    <script src="lab3.3.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+body {
+    height: 100vh;
+    width: 100vw;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: flex;
+    justify-content: center;
+    background-color: green;
+    cursor: no-drop;
+}
+
+table {
+    border-collapse: collapse;
+    margin: auto;
+    box-shadow: 0em 0em 2.5vmin 2.5vmin Fuchsia;
+    cursor: pointer;
+}
+
+td {
+    width: 10vmin;
+    height: 10vmin;
+}
+
+.black {
+    background-color: black;
+}
+
+.white {
+    background-color: white;
+}
